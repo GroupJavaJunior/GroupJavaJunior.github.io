@@ -4,12 +4,15 @@ var dangerZone = [
     {top: 190, left: 220},
     {top: 190, left: 220},
     {top: 200, left: 220},
-    {top: 210, left: 220},
     {top: 220, left: 220},
     {top: 230, left: 220},
     {top: 230, left: 210},
-    {top: 230, left: 200}
-
+    {top: 230, left: 200},
+    {top: 230, left: 190},
+    {top: 220, left: 190},
+    {top: 210, left: 190},
+    {top: 200, left: 190},
+    {top: 190, left: 190},
 
 
 
