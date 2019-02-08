@@ -18,7 +18,7 @@ body {
   text-align: center;
   transition: all 0.2s;
   margin: 0 auto;
-  width: 300px;
+  width: 500px;
 }
 .inner {
   display: inline-block;
@@ -42,7 +42,7 @@ body {
   background: #0084ff;
   color: #fff;
   margin-top: 40px;
-  width: 200px;
+  width: 400px;
 }
 #banner-message.alt button {
   background: #fff;
@@ -52,21 +52,62 @@ body {
 </head>
 <body>
   <!-- <a href="index.html">back</a> -->
-
-  <div id="banner-message">
-    <input id="1" type='text'>
-  </div>
-  <div id="banner-message">
-    <input id="2" type='text'>
-  </div>
-
   <div style="position:absolute; top:0; right:0; display: table; height: 100px; overflow: hidden; background: red">
     <div style="display: table-cell; width:100px; vertical-align: middle; background: white;">
-      <div style="text-align: center" class="text">
+      <div style="text-align: center" class="key_text">
         For input keys
       </div>
     </div>
   </div>
+
+  <div style="margin: 0 auto; display: table; height: 400px; overflow: hidden; background: red">
+      <div style="display: table-cell; width:500px; vertical-align: middle; background: white;">
+        <div style="text-align: center" class="text">
+            <div style="width: 50%; display: inline-block; text-align: right" class="text">
+                First field:
+            </div>
+            <div style="width: 49%; display: inline-block; text-align: center" class="text">
+                <input id="1" type='text'>
+            </div>
+        </div>
+
+        <div style="margin-top: 10px; text-align: center" class="text">
+            <div style="width: 50%; display: inline-block; text-align: right" class="text">
+                Second field:
+            </div>
+            <div style="width: 49%; display: inline-block; text-align: center" class="text">
+                <input id="2" type='text'>
+            </div>
+        </div>
+
+        <div style="margin-top: 10px; text-align: center" class="text">
+            <div style="width: 50%; display: inline-block; text-align: right" class="text">
+                Decimal separator:
+            </div>
+            <div style="width: 49%; display: inline-block; text-align: center" class="text">
+                <div id="decimal">.</div>
+            </div>
+        </div>
+
+        <div style="margin-top: 10px; text-align: center" class="text">
+            <div style="width: 50%; display: inline-block; text-align: right" class="text">
+            </div>
+            <div style="width: 49%; display: inline-block; text-align: center" class="text">
+                <input id="swap" value="swap" type='button'>
+            </div>
+        </div>
+            
+        
+        <div style="margin-top: 10px; text-align: center" class="text">
+            <div style="width: 50%; display: inline-block; text-align: right" class="text">
+                Thousand separator:
+            </div>
+            <div style="width: 49%; display: inline-block; text-align: center" class="text">
+                <div id="thousand">,</div>
+            </div>
+        </div>
+      </div>
+    </div>
 
 </body>
 </html>

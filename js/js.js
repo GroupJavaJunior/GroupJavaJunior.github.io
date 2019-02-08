@@ -32,8 +32,13 @@ var get_selected_text = function() {
 $.fn.getCursorPosition = function() {
     return this.get && this.get(0).selectionStart || 0;
 };
-var thousand_separator = '.';
-var decimal_separator = ',';
+
+var setup_thousand = $('div#thousand');
+var setup_decimal = $('div#decimal');
+
+var thousand_separator = ',';
+var decimal_separator = '.';
+
 var valid_symbols = /[0-9,.]/g;
 var not_valid_symbols = /[^0-9,.]/g;
 
@@ -62,7 +67,7 @@ $(document).ready(function(){
     }
 
     input.on('keypress', function(evt) {
-        $('.text').text(evt.key);
+        $('.key_text').text(evt.key);
 
         var is_selected_text = get_selected_text().length > 1;
         var is_valid_symbol = evt.key.replace(valid_symbols, '') === '';
@@ -132,12 +137,9 @@ $(document).ready(function(){
     });
 
     input2.on('keypress', function(evt) {
-        $('.text').text(evt.key);
+        $('.key_text').text(evt.key);
         var val = input2.val();
 
-        // if (evt.key === thousand_separator) {
-        //     return false;
-        // }
         var prev_pos = input2.getCursorPosition();
         if (evt.key === '-' || evt.key === '+') {
             if(val.replace(/[^-]/g, '').length > 0) {
@@ -171,6 +173,17 @@ $(document).ready(function(){
 
             return false;
         }
+    });
+
+    var swap = $('input#swap');
+
+    swap.on('click', function() {
+        var swap = setup_decimal.text();
+        setup_decimal.text(setup_thousand.text());
+        setup_thousand.text(swap);
+
+        decimal_separator = setup_decimal.text();
+        thousand_separator = setup_thousand.text();
     });
 });
 
