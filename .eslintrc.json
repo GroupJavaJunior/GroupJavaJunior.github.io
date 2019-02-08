@@ -1,9 +1,8 @@
 {
-    
     "env": {
         "jquery": true
     },
-    "extends": "standard",
+    "extends": "eslint:recommended",
     "parserOptions": {
         "ecmaVersion": 6,
         "sourceType": "module",
@@ -12,12 +11,13 @@
         }
     },
     "rules": {
-        "indent": ["error", 4],
-        "quotes": ["error", "single"],
-        "semi": ["error", "always"],
-        "no-cond-assign": ["error", "always"],
+        "linebreak-style": ["warn", "unix"],
+        "indent": ["warn", 4],
+        "quotes": ["warn", "single"],
+        "semi": ["warn", "always"],
+        "no-cond-assign": ["warn", "always"],
         "camelcase": [0, {"properties": "never"}],
-        "comma-dangle": ["error", {
+        "comma-dangle": ["warn", {
             "arrays": "never",
             "objects": "never",
             "imports": "never",
@@ -25,6 +25,6 @@
             "functions": "ignore"
         }],
         "space-before-function-paren": ["error", "never"],
-        "eqeqeq": [0, "warn"]
+        "eqeqeq": ["warn", "always"]
     }
 }
