@@ -33,9 +33,6 @@ $.fn.getCursorPosition = function() {
     return this.get && this.get(0).selectionStart || 0;
 };
 
-var setup_thousand = $('div#thousand');
-var setup_decimal = $('div#decimal');
-
 var thousand_separator = ',';
 var decimal_separator = '.';
 
@@ -43,6 +40,8 @@ var valid_symbols = /[0-9,.]/g;
 var not_valid_symbols = /[^0-9,.]/g;
 
 $(document).ready(function(){
+    var setup_thousand = $('div#thousand');
+    var setup_decimal = $('div#decimal');
     var input = $('input#1');
 
     input.on('paste', function(e){
