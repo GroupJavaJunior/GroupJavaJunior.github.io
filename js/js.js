@@ -242,11 +242,9 @@ var currencyfield = {
     },
 
     check_valid: function(val) {
-        //val = val.replace(/[,.]0*$/g, '');
         var valid = false;
-        var last_index_thousand = val.lastIndexOf(thousand_separator);
-        var last_index_decimal = val.lastIndexOf(decimal_separator);
-        var last_pos = Math.max(last_index_thousand, last_index_decimal);
+        val = val.replace(/[,.]/g, thousand_separator);
+        var last_pos = val.lastIndexOf(thousand_separator);
 
         if (last_pos < 0) { valid = true; }
 
@@ -369,4 +367,4 @@ var test = {
             }
         });
     }
-}
+};
