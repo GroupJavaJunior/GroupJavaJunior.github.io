@@ -254,11 +254,11 @@ var currencyfield = {
             val = currencyfield.replaceAt(val, last_pos, decimal_separator);
         }
 
-        var match_three = val.match(/[0-9][,.][0-9]{3}$/g);
-        if (match_three && match_three[0]) {
-            valid = true;
-            val = currencyfield.replaceAt(val, last_pos, thousand_separator);
-        }
+        // var match_three = val.match(/[0-9][,.][0-9]{3}$/g);
+        // if (match_three && match_three[0]) {
+        //     valid = true;
+        //     val = currencyfield.replaceAt(val, last_pos, thousand_separator);
+        // }
 
         return { valid: valid, val: val };
     }
