@@ -121,19 +121,30 @@ $(document).ready(function(){
 
     input2.on('blur', function() {
         var val = input2.val();
-        var last_index_thousand = val.lastIndexOf(thousand_separator);
+        var result = currencyfield.check_valid(val);
 
-        if (last_index_thousand < 0) {
-            val && input2.val(currencyfield.format_number(val));
-            return false;
+        if (result.valid) {
+            input2.val(currencyfield.format_number(result.val));
         } else {
-            if (val.slice(last_index_thousand + 1, last_index_thousand + 4).length > 2) {
-                input2.val(currencyfield.format_number(val));
-            } else {
-                input2.val('');
-            }
+            input2.val('');
         }
     });
+
+    // input2.on('blur', function() {
+    //     var val = input2.val();
+    //     var last_index_thousand = val.lastIndexOf(thousand_separator);
+
+    //     if (last_index_thousand < 0) {
+    //         val && input2.val(currencyfield.format_number(val));
+    //         return false;
+    //     } else {
+    //         if (val.slice(last_index_thousand + 1, last_index_thousand + 4).length > 2) {
+    //             input2.val(currencyfield.format_number(val));
+    //         } else {
+    //             input2.val('');
+    //         }
+    //     }
+    // });
 
     input2.on('keypress', function(evt) {
         $('.key_text').text(evt.key);
@@ -156,20 +167,7 @@ $(document).ready(function(){
             return false;
         }
 
-        if (evt.key.replace(valid_symbols, '') !== '') { 
-            return false;
-        }
-
-        if (evt.key === '-' || evt.key === '+') {
-            if(val.replace(/[^-]/g, '').length > 0) {
-                
-                input2.val(val.replace(/-/g, ''));
-                input2.setCursorPosition(prev_pos - 1);
-            } else if (evt.key === '-') {
-                input2.val('-' + val);
-                input2.setCursorPosition(prev_pos + 1);
-            }
-
+        if (evt.key.replace(valid_symbols, '') !== '') {
             return false;
         }
     });
@@ -237,5 +235,138 @@ var currencyfield = {
         var thousand_pattern = new RegExp('\\' + thousand_separator, 'g');
         var decimal_pattern = new RegExp('\\' + decimal_separator, 'g');
         return num_str.replace(thousand_pattern, '').replace(decimal_pattern, '.');
+    },
+
+    replaceAt: function(string, index, replace) {
+        return string.substring(0, index) + replace + string.substring(index + 1);
+    },
+
+    check_valid: function(val) {
+        //val = val.replace(/[,.]0*$/g, '');
+        var valid = false;
+        var last_index_thousand = val.lastIndexOf(thousand_separator);
+        var last_index_decimal = val.lastIndexOf(decimal_separator);
+        var last_pos = Math.max(last_index_thousand, last_index_decimal);
+
+        if (last_pos < 0) { valid = true; }
+
+        var match_double_end = val.match(/[,.][0-9]{0,2}$/g);
+        if (match_double_end && match_double_end[0]) {
+            valid = true;
+            val = currencyfield.replaceAt(val, last_pos, decimal_separator);
+        }
+
+        var match_three = val.match(/[0-9][,.][0-9]{3}$/g);
+        if (match_three && match_three[0]) {
+            valid = true;
+            val = currencyfield.replaceAt(val, last_pos, thousand_separator);
+        }
+
+        return { valid: valid, val: val };
     }
 };
+
+var test = {
+    tested_data: function() {
+        return [
+            { input: ',000', valid: '' },
+            { input: '.000', valid: '' },
+            { input: ',0000', valid: '' },
+            { input: '.0000', valid: '' },
+            { input: ',0001', valid: '' },
+            { input: '.0001', valid: '' },
+            { input: '1,0001', valid: '' },
+            { input: '1.0001', valid: '' },
+            { input: '1,0000', valid: '' },
+            { input: '1.0000', valid: '' },
+            { input: '0', valid: '0' + decimal_separator + '00' },
+            { input: '00', valid: '0' + decimal_separator + '00' },
+            { input: '0,', valid: '0' + decimal_separator + '00' },
+            { input: '0.', valid: '0' + decimal_separator + '00' },
+            { input: ',', valid: '0' + decimal_separator + '00' },
+            { input: '.', valid: '0' + decimal_separator + '00' },
+            { input: '.0', valid: '0' + decimal_separator + '00' },
+            { input: '.00', valid: '0' + decimal_separator + '00' },
+            { input: ',0', valid: '0' + decimal_separator + '00' },
+            { input: ',00', valid: '0' + decimal_separator + '00' },
+            
+
+            { input: '01', valid: '1' + decimal_separator + '00' },
+            { input: '10', valid: '10' + decimal_separator + '00' },
+            { input: '100', valid: '100' + decimal_separator + '00' },
+            { input: '100,0', valid: '100' + decimal_separator + '00' },
+            { input: '100,01', valid: '100' + decimal_separator + '01' },
+            { input: '100,001', valid: '100' + thousand_separator + '001' + decimal_separator + '00' },
+            
+            { input: '1.000', valid: '1' + thousand_separator + '000' + decimal_separator + '00' },
+            { input: '1000', valid: '1' + thousand_separator + '000' + decimal_separator + '00' },
+
+            { input: '1', valid: '1' + decimal_separator + '00' },
+            { input: '1,', valid: '1' + decimal_separator + '00' },
+            { input: '1.', valid: '1' + decimal_separator + '00' },
+            { input: '1,0', valid: '1' + decimal_separator + '00' },
+            { input: '1.0', valid: '1' + decimal_separator + '00' },
+            { input: '1,00', valid: '1' + decimal_separator + '00' },
+            { input: '1.00', valid: '1' + decimal_separator + '00' },
+            { input: '1000', valid: '1' + thousand_separator + '000' + decimal_separator + '00' },
+            { input: '1,000', valid: '1' + thousand_separator + '000' + decimal_separator + '00' },
+            { input: '1.000', valid: '1' + thousand_separator + '000' + decimal_separator + '00' },
+            { input: '11', valid: '11' + decimal_separator + '00' },
+            { input: '11,', valid: '11' + decimal_separator + '00' },
+            { input: '11.', valid: '11' + decimal_separator + '00' },
+            { input: '11,0', valid: '11' + decimal_separator + '00' },
+            { input: '11.0', valid: '11' + decimal_separator + '00' },
+            { input: '11,00', valid: '11' + decimal_separator + '00' },
+            { input: '11.00', valid: '11' + decimal_separator + '00' },
+            { input: '11,000', valid: '11' + thousand_separator + '000' + decimal_separator + '00' },
+            { input: '11.000', valid: '11' + thousand_separator + '000' + decimal_separator + '00' },
+            { input: '123', valid: '123' + decimal_separator + '00' },
+            { input: '123,', valid: '123' + decimal_separator + '00' },
+            { input: '123.', valid: '123' + decimal_separator + '00' },
+            { input: '123,0', valid: '123' + decimal_separator + '00' },
+            { input: '123.0', valid: '123' + decimal_separator + '00' },
+            { input: '123,00', valid: '123' + decimal_separator + '00' },
+            { input: '123.00', valid: '123' + decimal_separator + '00' },
+            { input: '123,000', valid: '123' + thousand_separator + '000' + decimal_separator + '00' },
+            { input: '123.000', valid: '123' + thousand_separator + '000' + decimal_separator + '00' },
+            { input: '1,123', valid: '1' + thousand_separator + '123' + decimal_separator + '00' },
+            { input: '1,123,', valid: '1' + thousand_separator + '123' + decimal_separator + '00' },
+            { input: '1,123.', valid: '1' + thousand_separator + '123' + decimal_separator + '00' },
+
+            { input: '123', valid: '123' + decimal_separator + '00' },
+            { input: '123,', valid: '123' + decimal_separator + '00' },
+            { input: '123.', valid: '123' + decimal_separator + '00' },
+            { input: '1234', valid: '1' + thousand_separator + '234' + decimal_separator + '00' },
+            { input: '1234,', valid: '1' + thousand_separator + '234' + decimal_separator + '00' },
+            { input: '1234.', valid: '1' + thousand_separator + '234' + decimal_separator + '00' },
+            { input: '1234.1', valid: '1' + thousand_separator + '234' + decimal_separator + '1' },
+            { input: '1234,01', valid: '1' + thousand_separator + '234' + decimal_separator + '01' },
+            { input: '1234,123', valid: '1' + thousand_separator + '234' + thousand_separator + '123' + decimal_separator + '00' },
+            { input: '1,123', valid: '1' + thousand_separator + '123' + decimal_separator + '00' }
+        ];
+    },
+
+    add: function(input, valid) {
+        test.tested_data.push({ input: input, valid: valid });
+    },
+
+    test: function() {
+        $.each(test.tested_data(), function(b, a) {
+            var actual = currencyfield.check_valid(a.input);
+            var actual_val = currencyfield.format_number(actual.val);
+            var expected = a.valid;
+
+            if (!actual.valid && expected !== '') {
+                console.log('not valid for: ' + a.input);
+                console.log('actual: ' + actual_val + '|' + ' expected: ' + expected);
+                console.log('===================================');
+            }
+
+            if (actual.valid && actual_val !== expected) {
+                console.log('diferencies for: ' + a.input);
+                console.log('actual: ' + actual_val + '|' + ' expected: ' + expected);
+                console.log('===================================');
+            }
+        });
+    }
+}
