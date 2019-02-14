@@ -130,6 +130,22 @@ $(document).ready(function(){
         }
     });
 
+    input2.on('paste', function(e){
+        var selected_text = get_selected_text();
+        var prev_pos = input2.getCursorPosition();
+        var val = input2.val();
+        var replacement = val.slice(0, prev_pos) +
+            val.slice(prev_pos + selected_text.length, val.length);
+
+        var pasted_data = e.originalEvent.clipboardData.getData('text');
+        var clear_data = pasted_data.replace(not_valid_symbols, '');
+        var new_val = insertTo(replacement, clear_data, prev_pos);
+
+        input2.val(new_val);
+        input2.setCursorPosition(prev_pos + clear_data.length);
+        return false;
+    });
+
     // input2.on('blur', function() {
     //     var val = input2.val();
     //     var last_index_thousand = val.lastIndexOf(thousand_separator);
