@@ -337,7 +337,7 @@ var currencyfield = {
             );
             val = currencyfield.replaceAt(val, last_pos, decimal_separator);
 
-            if (val > 0 && val < 1) { variants = []; }
+            if (val >= 0 && val < 1) { variants = []; }
         }
 
         return { valid: valid, val: val, variants: variants };
