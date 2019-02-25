@@ -15,6 +15,10 @@ $.fn.setCursorPosition = function(pos) {
     return this;
 };
 
+$.fn.getCursorPosition = function() {
+    return this.get && this.get(0).selectionStart || 0;
+};
+
 var get_selected_text = function() {
     var text = '';
     var activeEl = document.activeElement;
@@ -29,15 +33,12 @@ var get_selected_text = function() {
     return text;
 };
 
-$.fn.getCursorPosition = function() {
-    return this.get && this.get(0).selectionStart || 0;
-};
 
 var thousand_separator = ',';
 var decimal_separator = '.';
 
 var valid_symbols = /[0-9,.]/g;
-var not_valid_symbols = /[^0-9,.]/g;
+var not_valid_symbols = /[^0-9,.-]/g;
 
 $(document).ready(function(){
     var setup_thousand = $('div#thousand');
@@ -119,9 +120,40 @@ $(document).ready(function(){
 
     var input2 = $('input#2');
 
+    function handle_variant(val) {
+        var result = currencyfield.check_valid(val);
+
+        if (result.variants && result.variants.length > 0) {
+            input2.autocomplete({
+                minLength: 0,
+                source: function(request, response) {
+                    response(result.variants);
+                },
+                select: function() {
+                    input2.autocomplete('destroy');
+                }
+            });
+            input2.autocomplete('search','');
+        } else {
+            if (input2.data('ui-autocomplete')) {
+                input2.autocomplete('destroy');
+            }
+        }
+
+        return result;
+    }
+
+    input2.on('keyup', function(evt) {
+        if (evt.keyCode === 38 || evt.keyCode === 40 || evt.keyCode === 13) { return true; }
+        var val = input2.val();
+        handle_variant(val);
+    });
+
     input2.on('blur', function() {
         var val = input2.val();
         var result = currencyfield.check_valid(val);
+
+        if (input2.data('ui-autocomplete')) { input2.autocomplete('destroy'); }
 
         if (result.valid) {
             input2.val(currencyfield.format_number(result.val));
@@ -141,26 +173,11 @@ $(document).ready(function(){
         var clear_data = pasted_data.replace(not_valid_symbols, '');
         var new_val = insertTo(replacement, clear_data, prev_pos);
 
-        input2.val(new_val);
+        //input2.val(new_val);
         input2.setCursorPosition(prev_pos + clear_data.length);
+        input2.val(handle_variant(new_val).val);
         return false;
     });
-
-    // input2.on('blur', function() {
-    //     var val = input2.val();
-    //     var last_index_thousand = val.lastIndexOf(thousand_separator);
-
-    //     if (last_index_thousand < 0) {
-    //         val && input2.val(currencyfield.format_number(val));
-    //         return false;
-    //     } else {
-    //         if (val.slice(last_index_thousand + 1, last_index_thousand + 4).length > 2) {
-    //             input2.val(currencyfield.format_number(val));
-    //         } else {
-    //             input2.val('');
-    //         }
-    //     }
-    // });
 
     input2.on('keypress', function(evt) {
         $('.key_text').text(evt.key);
@@ -183,7 +200,7 @@ $(document).ready(function(){
             return false;
         }
 
-        if (evt.key.replace(valid_symbols, '') !== '') {
+        if (evt.key.replace(not_valid_symbols, '') === '') {
             return false;
         }
     });
@@ -257,26 +274,73 @@ var currencyfield = {
         return string.substring(0, index) + replace + string.substring(index + 1);
     },
 
+    minus_handler: function(val) {
+        var minus_regexp = /[-]/g;
+        var match_minus = val.match(minus_regexp);
+        if (match_minus) {
+            val = val.replace(minus_regexp, '');
+            if (match_minus.length % 2 !== 0) {
+                val = '-' + val;
+            }
+        }
+
+        return val;
+    },
+
     check_valid: function(val) {
         var valid = false;
+        var no_valid = /[^0-9,.-]/g;
+
+        // Стоит удалить все кроме валидных символов
+        val = val.replace(no_valid, '');
+
+        // Теперь определим знак числа + или -, определить количество чет или нечет
+        // var minus_regexp = /[-]/g;
+        // var match_minus = val.match(minus_regexp);
+        // if (match_minus) {
+        //     val = val.replace(minus_regexp, '');
+        //     if (match_minus.length % 2 !== 0) {
+        //         val = '-' + val;
+        //     }
+        // }
+
+        val = currencyfield.minus_handler(val);
+
+        // Замена разделителей на тысячные
         val = val.replace(/[,.]/g, thousand_separator);
         var last_pos = val.lastIndexOf(thousand_separator);
 
-        if (last_pos < 0) { valid = true; }
+        // Если у нас нет разделителей, число считать валидным
+        if (last_pos < 0) {
+            return { valid: true, val: val };
+        }
 
+        // Если после последнего разделителя 0,1,2 числа, то этот разделитель десятичный
+        // Мы должны его поменять для пользователя на тот, что в настройках
         var match_double_end = val.match(/[,.][0-9]{0,2}$/g);
         if (match_double_end && match_double_end[0]) {
             valid = true;
             val = currencyfield.replaceAt(val, last_pos, decimal_separator);
         }
 
-        // var match_three = val.match(/[0-9][,.][0-9]{3}$/g);
-        // if (match_three && match_three[0]) {
-        //     valid = true;
-        //     val = currencyfield.replaceAt(val, last_pos, thousand_separator);
-        // }
+        // Если у нас 3 и более знаков после последнего разделителя, мы не можем быть уверены,
+        // что имеет в виду пользователь
+        var variants = [];
+        var match_three = val.match(/[,.][0-9]{3,}$/g);
+        if (match_three && match_three[0]) {
+            valid = true;
+            variants.push(
+                currencyfield.format_number(currencyfield.replaceAt(val, last_pos, decimal_separator))
+            );
+            variants.push(
+                currencyfield.format_number(currencyfield.replaceAt(val, last_pos, thousand_separator))
+            );
+            val = currencyfield.replaceAt(val, last_pos, decimal_separator);
 
-        return { valid: valid, val: val };
+            if (val > 0 && val < 1) { variants = []; }
+        }
+
+        return { valid: valid, val: val, variants: variants };
     }
 };
 
