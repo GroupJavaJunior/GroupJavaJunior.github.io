@@ -139,7 +139,6 @@ $(document).ready(function(){
     });
 });
 
-
 var currencyfield = {
     default_rounding_degree: 10,
     amount_rounding_degree: 2,
