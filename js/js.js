@@ -33,17 +33,60 @@ var get_selected_text = function() {
     return text;
 };
 
+function insertTo(str, char, pos) {
+    return [str.slice(0, pos), char, str.slice(pos)].join('');
+}
 
 var thousand_separator = ',';
 var decimal_separator = '.';
 
-var valid_symbols = /[0-9,.]/g;
-var not_valid_symbols = /[^0-9,.-]/g;
+var regex_invalid_symbols  = /[^0-9,.-]/g;
 
 $(document).ready(function(){
     var setup_thousand = $('div#thousand');
     var setup_decimal = $('div#decimal');
     var input = $('input#1');
+
+    function handle_variant(val) {
+        var result = currencyfield.check_valid(val);
+
+        if (result.variants && result.variants.length > 0) {
+            input.autocomplete({
+                minLength: 0,
+                source: function(request, response) {
+                    response(result.variants);
+                },
+                select: function() {
+                    input.autocomplete('destroy');
+                }
+            });
+            input.autocomplete('search','');
+        } else {
+            if (input.data('ui-autocomplete')) {
+                input.autocomplete('destroy');
+            }
+        }
+
+        return result;
+    }
+
+    input.on('keyup', function(evt) {
+        if (evt.keyCode === 38 || evt.keyCode === 40 || evt.keyCode === 13) { return true; }
+        handle_variant(input.val());
+    });
+
+    input.on('blur', function() {
+        var val = input.val();
+        var result = currencyfield.check_valid(val);
+
+        if (input.data('ui-autocomplete')) { input.autocomplete('destroy'); }
+
+        if (result.valid) {
+            input.val(currencyfield.format_number(result.val));
+        } else {
+            input.val('');
+        }
+    });
 
     input.on('paste', function(e){
         var selected_text = get_selected_text();
@@ -53,39 +96,21 @@ $(document).ready(function(){
             val.slice(prev_pos + selected_text.length, val.length);
 
         var pasted_data = e.originalEvent.clipboardData.getData('text');
-        var clear_data = pasted_data.replace(not_valid_symbols, '');
+        var clear_data = pasted_data.replace(regex_invalid_symbols, '');
         var new_val = insertTo(replacement, clear_data, prev_pos);
 
-        var parsed_string = currencyfield.parse_string(new_val, '');
-        input.val(parsed_string);
+        input.val(handle_variant(new_val).val);
         input.setCursorPosition(prev_pos + clear_data.length);
         return false;
     });
 
-    function insertTo(str, char, pos) {
-        return [str.slice(0, pos), char, str.slice(pos)].join('');
-    }
-
     input.on('keypress', function(evt) {
         $('.key_text').text(evt.key);
-
-        var is_selected_text = get_selected_text().length > 1;
-        var is_valid_symbol = evt.key.replace(valid_symbols, '') === '';
-        if (is_selected_text && is_valid_symbol) {
-            return true;
-        }
-
-        if (evt.key === thousand_separator) { return false; }
-
         var val = input.val();
-
-        if (evt.key === decimal_separator && val.split(decimal_separator).length > 1) {
-            return false;
-        }
 
         var prev_pos = input.getCursorPosition();
         if (evt.key === '-' || evt.key === '+') {
-            if(val.indexOf('-') >= 0) {
+            if(val.replace(/[^-]/g, '').length > 0) {
                 input.val(val.replace(/-/g, ''));
                 input.setCursorPosition(prev_pos - 1);
             } else if (evt.key === '-') {
@@ -96,113 +121,10 @@ $(document).ready(function(){
             return false;
         }
 
-        if (!is_valid_symbol) { return false; }
+        var more_than_two_decimal = evt.key === decimal_separator && val.split(decimal_separator).length > 1;
+        var has_invalid_symbols = evt.key.replace(regex_invalid_symbols, '') === '';
 
-        var new_val = insertTo(val, evt.key, prev_pos);
-
-        var parsed_string = currencyfield.parse_string(new_val, '');
-        input.val(parsed_string);
-        input.setCursorPosition(prev_pos + 1);
-        return false;
-    });
-
-    input.on('focus', function() {
-        var val = input.val();
-        var parse = currencyfield.parse_string(val, '');
-        val && input.val(parse);
-    });
-
-    input.on('blur', function() {
-        var val = input.val();
-        var format_number = currencyfield.format_number(val, false);
-        val && input.val(format_number);
-    });
-
-    var input2 = $('input#2');
-
-    function handle_variant(val) {
-        var result = currencyfield.check_valid(val);
-
-        if (result.variants && result.variants.length > 0) {
-            input2.autocomplete({
-                minLength: 0,
-                source: function(request, response) {
-                    response(result.variants);
-                },
-                select: function() {
-                    input2.autocomplete('destroy');
-                }
-            });
-            input2.autocomplete('search','');
-        } else {
-            if (input2.data('ui-autocomplete')) {
-                input2.autocomplete('destroy');
-            }
-        }
-
-        return result;
-    }
-
-    input2.on('keyup', function(evt) {
-        if (evt.keyCode === 38 || evt.keyCode === 40 || evt.keyCode === 13) { return true; }
-        var val = input2.val();
-        handle_variant(val);
-    });
-
-    input2.on('blur', function() {
-        var val = input2.val();
-        var result = currencyfield.check_valid(val);
-
-        if (input2.data('ui-autocomplete')) { input2.autocomplete('destroy'); }
-
-        if (result.valid) {
-            input2.val(currencyfield.format_number(result.val));
-        } else {
-            input2.val('');
-        }
-    });
-
-    input2.on('paste', function(e){
-        var selected_text = get_selected_text();
-        var prev_pos = input2.getCursorPosition();
-        var val = input2.val();
-        var replacement = val.slice(0, prev_pos) +
-            val.slice(prev_pos + selected_text.length, val.length);
-
-        var pasted_data = e.originalEvent.clipboardData.getData('text');
-        var clear_data = pasted_data.replace(not_valid_symbols, '');
-        var new_val = insertTo(replacement, clear_data, prev_pos);
-
-        //input2.val(new_val);
-        input2.setCursorPosition(prev_pos + clear_data.length);
-        input2.val(handle_variant(new_val).val);
-        return false;
-    });
-
-    input2.on('keypress', function(evt) {
-        $('.key_text').text(evt.key);
-        var val = input2.val();
-
-        var prev_pos = input2.getCursorPosition();
-        if (evt.key === '-' || evt.key === '+') {
-            if(val.replace(/[^-]/g, '').length > 0) {
-                input2.val(val.replace(/-/g, ''));
-                input2.setCursorPosition(prev_pos - 1);
-            } else if (evt.key === '-') {
-                input2.val('-' + val);
-                input2.setCursorPosition(prev_pos + 1);
-            }
-
-            return false;
-        }
-
-        if (evt.key === decimal_separator && val.split(decimal_separator).length > 1) {
-            return false;
-        }
-
-        if (evt.key.replace(not_valid_symbols, '') === '') {
-            return false;
-        }
+        if (more_than_two_decimal || has_invalid_symbols) { return false; }
     });
 
     var swap = $('input#swap');
@@ -289,10 +211,9 @@ var currencyfield = {
 
     check_valid: function(val) {
         var valid = false;
-        var no_valid = /[^0-9,.-]/g;
 
         // Стоит удалить все кроме валидных символов
-        val = val.replace(no_valid, '');
+        val = val.replace(regex_invalid_symbols, '');
 
         // Теперь определим знак числа + или -, определить количество чет или нечет
         // var minus_regexp = /[-]/g;
@@ -335,9 +256,10 @@ var currencyfield = {
             variants.push(
                 currencyfield.format_number(currencyfield.replaceAt(val, last_pos, thousand_separator))
             );
+            var normalize_string = currencyfield.replaceAt(val, last_pos, '.');
+            var less_than_one = normalize_string > -1 && normalize_string < 1;
+            if (less_than_one) { variants = []; }
             val = currencyfield.replaceAt(val, last_pos, decimal_separator);
-
-            if (val >= 0 && val < 1) { variants = []; }
         }
 
         return { valid: valid, val: val, variants: variants };
@@ -347,16 +269,16 @@ var currencyfield = {
 var test = {
     tested_data: function() {
         return [
-            { input: ',000', valid: '' },
-            { input: '.000', valid: '' },
-            { input: ',0000', valid: '' },
-            { input: '.0000', valid: '' },
-            { input: ',0001', valid: '' },
-            { input: '.0001', valid: '' },
-            { input: '1,0001', valid: '' },
-            { input: '1.0001', valid: '' },
-            { input: '1,0000', valid: '' },
-            { input: '1.0000', valid: '' },
+            { input: ',000', valid: '0' + decimal_separator + '00' },
+            { input: '.000', valid: '0' + decimal_separator + '00' },
+            { input: ',0000', valid: '0' + decimal_separator + '00' },
+            { input: '.0000', valid: '0' + decimal_separator + '00' },
+            { input: ',0001', valid: '0' + decimal_separator + '0001' },
+            { input: '.0001', valid: '0' + decimal_separator + '0001' },
+            { input: '1,0001', valid: '1' + decimal_separator + '0001' },
+            { input: '1.0001', valid: '1' + decimal_separator + '0001' },
+            { input: '1,0000', valid: '1' + decimal_separator + '00' },
+            { input: '1.0000', valid: '1' + decimal_separator + '00' },
             { input: '0', valid: '0' + decimal_separator + '00' },
             { input: '00', valid: '0' + decimal_separator + '00' },
             { input: '0,', valid: '0' + decimal_separator + '00' },
@@ -374,9 +296,9 @@ var test = {
             { input: '100', valid: '100' + decimal_separator + '00' },
             { input: '100,0', valid: '100' + decimal_separator + '00' },
             { input: '100,01', valid: '100' + decimal_separator + '01' },
-            { input: '100,001', valid: '100' + thousand_separator + '001' + decimal_separator + '00' },
+            { input: '100,001', valid: '100' + decimal_separator + '001' },
             
-            { input: '1.000', valid: '1' + thousand_separator + '000' + decimal_separator + '00' },
+            { input: '1.000', valid: '1' + decimal_separator + '00' },
             { input: '1000', valid: '1' + thousand_separator + '000' + decimal_separator + '00' },
 
             { input: '1', valid: '1' + decimal_separator + '00' },
@@ -387,8 +309,8 @@ var test = {
             { input: '1,00', valid: '1' + decimal_separator + '00' },
             { input: '1.00', valid: '1' + decimal_separator + '00' },
             { input: '1000', valid: '1' + thousand_separator + '000' + decimal_separator + '00' },
-            { input: '1,000', valid: '1' + thousand_separator + '000' + decimal_separator + '00' },
-            { input: '1.000', valid: '1' + thousand_separator + '000' + decimal_separator + '00' },
+            { input: '1,000', valid: '1' + decimal_separator + '00' },
+            { input: '1.000', valid: '1' + decimal_separator + '00' },
             { input: '11', valid: '11' + decimal_separator + '00' },
             { input: '11,', valid: '11' + decimal_separator + '00' },
             { input: '11.', valid: '11' + decimal_separator + '00' },
@@ -396,8 +318,8 @@ var test = {
             { input: '11.0', valid: '11' + decimal_separator + '00' },
             { input: '11,00', valid: '11' + decimal_separator + '00' },
             { input: '11.00', valid: '11' + decimal_separator + '00' },
-            { input: '11,000', valid: '11' + thousand_separator + '000' + decimal_separator + '00' },
-            { input: '11.000', valid: '11' + thousand_separator + '000' + decimal_separator + '00' },
+            { input: '11,000', valid: '11' + decimal_separator + '00' },
+            { input: '11.000', valid: '11' + decimal_separator + '00' },
             { input: '123', valid: '123' + decimal_separator + '00' },
             { input: '123,', valid: '123' + decimal_separator + '00' },
             { input: '123.', valid: '123' + decimal_separator + '00' },
@@ -405,9 +327,9 @@ var test = {
             { input: '123.0', valid: '123' + decimal_separator + '00' },
             { input: '123,00', valid: '123' + decimal_separator + '00' },
             { input: '123.00', valid: '123' + decimal_separator + '00' },
-            { input: '123,000', valid: '123' + thousand_separator + '000' + decimal_separator + '00' },
-            { input: '123.000', valid: '123' + thousand_separator + '000' + decimal_separator + '00' },
-            { input: '1,123', valid: '1' + thousand_separator + '123' + decimal_separator + '00' },
+            { input: '123,000', valid: '123' + decimal_separator + '00' },
+            { input: '123.000', valid: '123' + decimal_separator + '00' },
+            { input: '1,123', valid: '1' + decimal_separator + '123' },
             { input: '1,123,', valid: '1' + thousand_separator + '123' + decimal_separator + '00' },
             { input: '1,123.', valid: '1' + thousand_separator + '123' + decimal_separator + '00' },
 
@@ -419,8 +341,7 @@ var test = {
             { input: '1234.', valid: '1' + thousand_separator + '234' + decimal_separator + '00' },
             { input: '1234.1', valid: '1' + thousand_separator + '234' + decimal_separator + '1' },
             { input: '1234,01', valid: '1' + thousand_separator + '234' + decimal_separator + '01' },
-            { input: '1234,123', valid: '1' + thousand_separator + '234' + thousand_separator + '123' + decimal_separator + '00' },
-            { input: '1,123', valid: '1' + thousand_separator + '123' + decimal_separator + '00' }
+            { input: '1234,123', valid: '1' + thousand_separator + '234' + decimal_separator + '123' }
         ];
     },
 
@@ -429,19 +350,19 @@ var test = {
     },
 
     test: function() {
-        $.each(test.tested_data(), function(b, a) {
-            var actual = currencyfield.check_valid(a.input);
+        $.each(test.tested_data(), function(b, tested_item) {
+            var actual = currencyfield.check_valid(tested_item.input);
             var actual_val = currencyfield.format_number(actual.val);
-            var expected = a.valid;
+            var expected = tested_item.valid;
 
             if (!actual.valid && expected !== '') {
-                console.log('not valid for: ' + a.input);
+                console.log('not valid for: ' + tested_item.input);
                 console.log('actual: ' + actual_val + '|' + ' expected: ' + expected);
                 console.log('===================================');
             }
 
             if (actual.valid && actual_val !== expected) {
-                console.log('diferencies for: ' + a.input);
+                console.log('diferencies for: ' + tested_item.input);
                 console.log('actual: ' + actual_val + '|' + ' expected: ' + expected);
                 console.log('===================================');
             }
