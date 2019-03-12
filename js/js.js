@@ -99,7 +99,6 @@ $(document).ready(function(){
         var clear_data = pasted_data.replace(regex_invalid_symbols, '');
         var new_val = insertTo(replacement, clear_data, prev_pos);
 
-        //input.val(handle_variant(new_val).val);
         input.val(new_val);
         input.setCursorPosition(prev_pos + clear_data.length);
         return false;
@@ -256,7 +255,7 @@ var currencyfield = {
             variants.push(currencyfield.format_number(default_variant));
             variants.push(currencyfield.format_number(second_variant));
 
-            var normalize_string = currencyfield.replaceAt(val, last_pos, '.');
+            var normalize_string = currencyfield.replaceAt(val, last_pos, '.').replace(/,/g, '');
             var less_than_one = normalize_string > -1 && normalize_string < 1;
             if (less_than_one) { variants = []; }
             val = currencyfield.replaceAt(val, last_pos, '.');
@@ -328,14 +327,15 @@ var test = {
             { input: '123,00', valid: '123' + decimal_separator + '00' },
             { input: '123.00', valid: '123' + decimal_separator + '00' },
             { input: '123,000', valid: '123' + decimal_separator + '00' },
-            { input: '123.000', valid: '123' + decimal_separator + '00', variants: [
-                '123' + decimal_separator + '00',
+            { input: '123.000', valid: '123' + decimal_separator + '00', variants:
                 '123' + thousand_separator + '000' + decimal_separator + '00'
-            ]},
-            { input: '1,123', valid: '1' + decimal_separator + '123', variants: [
-                '1' + decimal_separator + '123',
+            },
+            { input: '1,123', valid: '1' + decimal_separator + '123', variants:
                 '1' + thousand_separator + '123' + decimal_separator + '00'
-            ]},
+            },
+            { input: '1,12345', valid: '1' + decimal_separator + '12345', variants:
+                '112' + thousand_separator + '345' + decimal_separator + '00'
+            },
             { input: '1,123,', valid: '1' + thousand_separator + '123' + decimal_separator + '00' },
             { input: '1,123.', valid: '1' + thousand_separator + '123' + decimal_separator + '00' },
 
@@ -347,11 +347,14 @@ var test = {
             { input: '1234.', valid: '1' + thousand_separator + '234' + decimal_separator + '00' },
             { input: '1234.1', valid: '1' + thousand_separator + '234' + decimal_separator + '1' },
             { input: '1234,01', valid: '1' + thousand_separator + '234' + decimal_separator + '01' },
-            { input: '1234,123', valid: '1' + thousand_separator + '234' + decimal_separator + '123', variants: [
-                '1' + thousand_separator + '234' + decimal_separator + '123',
-                '1' + decimal_separator + '234' + thousand_separator + '123'
-            ]},
-            { input: '0.523', valid: '0' + decimal_separator + '523' }
+            { input: '1234,123', valid: '1' + thousand_separator + '234' + decimal_separator + '123', variants:
+                '1' + thousand_separator + '234' + thousand_separator + '123' + decimal_separator + '00'
+            },
+            { input: '0.523', valid: '0' + decimal_separator + '523' },
+            { input: '0.,523', valid: '0' + decimal_separator + '523' },
+            { input: '1.,523', valid: '1' + decimal_separator + '523', variants:
+                '1' + thousand_separator + '523' + decimal_separator + '00'
+            }
         ];
     },
 
@@ -365,13 +368,8 @@ var test = {
             var actual_val = currencyfield.format_number(actual.val);
             var expected = tested_item.valid;
 
-            if (tested_item.variants && (actual.variants.length !== tested_item.variants.length)) {
-                console.log('differencies in count of variants for: ' + tested_item.input);
-                console.log('===================================');
-            }
-
             if (tested_item.variants && tested_item.variants.length > 0) {
-                if (tested_item.variants[0] !== actual.variants[0] && tested_item.variants[1] !== actual.variants[1]) {
+                if (tested_item.valid !== actual.variants[0] || tested_item.variants !== actual.variants[1]) {
                     console.log('differnt variants for: ' + tested_item.input);
                     console.log('===================================');
                 }
