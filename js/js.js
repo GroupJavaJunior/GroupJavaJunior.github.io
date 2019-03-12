@@ -99,7 +99,8 @@ $(document).ready(function(){
         var clear_data = pasted_data.replace(regex_invalid_symbols, '');
         var new_val = insertTo(replacement, clear_data, prev_pos);
 
-        input.val(handle_variant(new_val).val);
+        //input.val(handle_variant(new_val).val);
+        input.val(new_val);
         input.setCursorPosition(prev_pos + clear_data.length);
         return false;
     });
@@ -143,7 +144,7 @@ var currencyfield = {
     default_rounding_degree: 10,
     amount_rounding_degree: 2,
     format_number: function(number, fixed) {
-        number = currencyfield.normalize_string(number, '');
+        // number = currencyfield.normalize_string(number, '');
         // Taken from https://gist.github.com/820619
         var num = parseFloat(number.toString().replace(/\$|,/g, ''));
         if (isNaN(num)) {
@@ -227,8 +228,8 @@ var currencyfield = {
         val = currencyfield.minus_handler(val);
 
         // Замена разделителей на тысячные
-        val = val.replace(/[,.]/g, thousand_separator);
-        var last_pos = val.lastIndexOf(thousand_separator);
+        val = val.replace(/[,.]/g, ',');
+        var last_pos = val.lastIndexOf(',');
 
         // Если у нас нет разделителей, число считать валидным
         if (last_pos < 0) {
@@ -240,7 +241,7 @@ var currencyfield = {
         var match_double_end = val.match(/[,.][0-9]{0,2}$/g);
         if (match_double_end && match_double_end[0]) {
             valid = true;
-            val = currencyfield.replaceAt(val, last_pos, decimal_separator);
+            val = currencyfield.replaceAt(val, last_pos, '.');
         }
 
         // Если у нас 3 и более знаков после последнего разделителя, мы не можем быть уверены,
@@ -250,15 +251,15 @@ var currencyfield = {
         if (match_three && match_three[0]) {
             valid = true;
 
-            var default_variant = currencyfield.replaceAt(val, last_pos, decimal_separator);
-            var second_variant = currencyfield.replaceAt(val, last_pos, thousand_separator);
+            var default_variant = currencyfield.replaceAt(val, last_pos, '.');
+            var second_variant = currencyfield.replaceAt(val, last_pos, ',');
             variants.push(currencyfield.format_number(default_variant));
             variants.push(currencyfield.format_number(second_variant));
 
             var normalize_string = currencyfield.replaceAt(val, last_pos, '.');
             var less_than_one = normalize_string > -1 && normalize_string < 1;
             if (less_than_one) { variants = []; }
-            val = currencyfield.replaceAt(val, last_pos, decimal_separator);
+            val = currencyfield.replaceAt(val, last_pos, '.');
         }
 
         return { valid: valid, val: val, variants: variants };
