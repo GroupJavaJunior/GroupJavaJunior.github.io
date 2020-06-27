@@ -29,7 +29,9 @@ const cars = [
 
 class App extends React.Component {
   state = {
-    cars: cars
+    cars: cars,
+    visible: true,
+    appTitle: 'Cars application'
   }
 
   handleMarked(name) {
@@ -42,6 +44,10 @@ class App extends React.Component {
   }
 
   renderCars() {
+    if (!this.state.visible) {
+      return null
+    }
+
     return this.state.cars.map(car => {
       return (
         <Car
@@ -53,9 +59,34 @@ class App extends React.Component {
     })
   }
 
+  toggleHandler() {
+    this.setState({ visible: !this.state.visible })
+  }
+
+  titleChangeHandler(title) {
+    if (title.trim() === '') {
+      return
+    }
+
+    this.setState({ appTitle: title })
+  }
+
   render() {
+    const style = {
+      marginRight: 20
+    }
+
     return (
       <div className="app">
+        <h1>{this.state.appTitle}</h1>
+        <button onClick={() => this.toggleHandler()} style={style}>Toggle</button>
+        <input
+          type="text"
+          placeholder="Change title"
+          onChange={(event) => this.titleChangeHandler(event.target.value)}
+          value={this.state.appTitle}
+        />
+        <hr />
         <div className="list">
           {this.renderCars()}
         </div>
