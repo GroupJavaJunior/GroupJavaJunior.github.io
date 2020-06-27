@@ -1,110 +1,118 @@
 <!DOCTYPE html>
 <html>
-<head>
-<title>Test currency input</title>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.0/jquery.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.css">
 
-<script src="js/js.js"></script>
-<style>
-body {
-  background: #20262E;
-  padding: 20px;
-  font-family: Helvetica;
-}
-#banner-message {
-  background: #fff;
-  border-radius: 4px;
-  padding: 20px;
-  font-size: 25px;
-  text-align: center;
-  transition: all 0.2s;
-  margin: 0 auto;
-  width: 500px;
-}
-.inner {
-  display: inline-block;
-  top: 25px;
-  margin: 0 auto;
-  position: relative;
-  width: 100px;
-  height: 100px;
-  background-color: white;
-  vertical-align: middle;
-}
-.demo{
-  position: absolute;
-  top: 0px;
-  right: 0px;
-  width: 150px;
-  height: 150px;
-  background-color: red;
-}
-#banner-message.alt {
-  background: #0084ff;
-  color: #fff;
-  margin-top: 40px;
-  width: 400px;
-}
-#banner-message.alt button {
-  background: #fff;
-  color: #000;
-}
-</style>
+<head>
+  <title>Test currency input</title>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.0/jquery.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.css">
+
+  <script src="js/js.js"></script>
+  <style>
+    body {
+      background: #20262E;
+      padding: 20px;
+      font-family: Helvetica;
+    }
+
+    #banner-message {
+      background: #fff;
+      border-radius: 4px;
+      padding: 20px;
+      font-size: 25px;
+      text-align: center;
+      transition: all 0.2s;
+      margin: 0 auto;
+      width: 500px;
+    }
+
+    .inner {
+      display: inline-block;
+      top: 25px;
+      margin: 0 auto;
+      position: relative;
+      width: 100px;
+      height: 100px;
+      background-color: white;
+      vertical-align: middle;
+    }
+
+    .demo {
+      position: absolute;
+      top: 0px;
+      right: 0px;
+      width: 150px;
+      height: 150px;
+      background-color: red;
+    }
+
+    #banner-message.alt {
+      background: #0084ff;
+      color: #fff;
+      margin-top: 40px;
+      width: 400px;
+    }
+
+    #banner-message.alt button {
+      background: #fff;
+      color: #000;
+    }
+  </style>
 </head>
+
 <body>
   <a href="index1.html">to game</a>
 
   <div style="margin: 0 auto; display: table; height: 400px; overflow: hidden;">
 
-      <div style="display: table-cell; width:500px; vertical-align: middle; background: white;">
+    <div style="display: table-cell; width:500px; vertical-align: middle; background: white;">
 
-        <div style="margin-top: 10px; text-align: center" class="text">
-            <div style="width: 50%; display: inline-block; text-align: right" class="text">
-                Input field:
-            </div>
-            <div style="width: 49%; display: inline-block; text-align: center" class="text">
-                <input id="1" type='text'>
-            </div>
+      <div style="margin-top: 10px; text-align: center" class="text">
+        <div style="width: 50%; display: inline-block; text-align: right" class="text">
+          Input field:
         </div>
-
-        <div style="margin-top: 10px; text-align: center" class="text">
-            <div style="width: 50%; display: inline-block; text-align: right" class="text">
-                Decimal separator:
-            </div>
-            <div style="width: 49%; display: inline-block; text-align: center" class="text">
-                <div id="decimal">.</div>
-            </div>
-        </div>
-
-        <div style="margin-top: 10px; text-align: center" class="text">
-            <div style="width: 50%; display: inline-block; text-align: right" class="text">
-            </div>
-            <div style="width: 49%; display: inline-block; text-align: center" class="text">
-                <input id="swap" value="swap" type='button'>
-            </div>
-        </div>
-            
-        
-        <div style="margin-top: 10px; text-align: center" class="text">
-            <div style="width: 50%; display: inline-block; text-align: right" class="text">
-                Thousand separator:
-            </div>
-            <div style="width: 49%; display: inline-block; text-align: center" class="text">
-                <div id="thousand">,</div>
-            </div>
+        <div style="width: 49%; display: inline-block; text-align: center" class="text">
+          <input id="1" type='text'>
         </div>
       </div>
 
-      <div style="top:0; right:0; display: table; height: 100px; overflow: hidden;">
-        <div style="display: table-cell; width:100px; vertical-align: middle; background: white;">
-          <div style="text-align: center" class="key_text">
-            For input keys
-          </div>
+      <div style="margin-top: 10px; text-align: center" class="text">
+        <div style="width: 50%; display: inline-block; text-align: right" class="text">
+          Decimal separator:
+        </div>
+        <div style="width: 49%; display: inline-block; text-align: center" class="text">
+          <div id="decimal">.</div>
+        </div>
+      </div>
+
+      <div style="margin-top: 10px; text-align: center" class="text">
+        <div style="width: 50%; display: inline-block; text-align: right" class="text">
+        </div>
+        <div style="width: 49%; display: inline-block; text-align: center" class="text">
+          <input id="swap" value="swap" type='button'>
+        </div>
+      </div>
+
+
+      <div style="margin-top: 10px; text-align: center" class="text">
+        <div style="width: 50%; display: inline-block; text-align: right" class="text">
+          Thousand separator:
+        </div>
+        <div style="width: 49%; display: inline-block; text-align: center" class="text">
+          <div id="thousand">,</div>
         </div>
       </div>
     </div>
 
+    <div style="top:0; right:0; display: table; height: 100px; overflow: hidden;">
+      <div style="display: table-cell; width:100px; vertical-align: middle; background: white;">
+        <div style="text-align: center" class="key_text">
+          For input keys
+        </div>
+      </div>
+    </div>
+  </div>
+
 </body>
+
 </html>
